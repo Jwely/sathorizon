@@ -55,20 +55,20 @@ def plot_observer_view(lat, lon, elevation):
     home = set_observer(lat, lon, elevation)
 
     # read in each # tle entry and save to list
-    savedsats = []
-    satnames = []
+    sat_objs  = []
+    sat_names = []
     i_name = 0
     while 3 * i_name + 2 <= len(content):
-        # for each satellite in the content list...
-        savedsats.append(ephem.readtle(content[3 * i_name], content[3 * i_name + 1], content[3 * i_name + 2]))
-        satnames.append(content[3 * i_name])
+        sat_objs.append(ephem.readtle(content[3 * i_name], content[3 * i_name + 1], content[3 * i_name + 2]))
+        sat_names.append(content[3 * i_name])
         i_name += 1
 
+    # establish the figure
     fig = plt.figure()
     t = time.time()
     print(t)
 
-    while 1:
+    while True:
         fig.clf()
         home.date = datetime.utcnow()
 
@@ -77,20 +77,20 @@ def plot_observer_view(lat, lon, elevation):
 
         # click on a satellite to print its TLE name to the console
         def onpick(event):
-            global t
-            if time.time() - t < 1.0:   # limits calls to 1 per second
-                return
-            t = time.time()
             ind = event.ind
             r = np.take(r_plot, ind)[0]
             theta = np.take(theta_plot, ind)[0]
-            i = 0
-            while i < len(savedsats) and (math.degrees(theta) != math.degrees(savedsats[i].az) or math.cos(savedsats[i].alt) != r):
-                i += 1
-            print(satnames[i], 'az=' + str(math.degrees(savedsats[i].az)), 'alt=' + str(math.degrees(savedsats[i].alt)))
+            theta_r = math.degrees(theta)
 
+            # print out satellite info
+            for i in range(len(sat_objs)):
+                if theta_r != math.degrees(sat_objs[i].az) or math.cos(sat_objs[i].alt) != r:
+                    print("{name}: az = {az} \t alt = {alt}".format(name = sat_names[i],
+                                                                    az = math.degrees(sat_objs[i].az),
+                                                                    alt = math.degrees(sat_objs[i].alt)))
 
-        for sat in savedsats:   # for each satellite in the savedsats list...
+        # generate coordinate list
+        for sat in sat_objs:
             sat.compute(home)
             if math.degrees(sat.alt) > 0.0:
                 theta_plot.append(sat.az)
