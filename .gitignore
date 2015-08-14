@@ -81,14 +81,14 @@ Temporary Items
 # Windows
 # =========================
 
-# Windows image file caches
+# Windows image myfile caches
 Thumbs.db
 ehthumbs.db
 
-# Folder config file
+# Folder config myfile
 Desktop.ini
 
-# Recycle Bin used on file shares
+# Recycle Bin used on myfile shares
 $RECYCLE.BIN/
 
 # Windows Installer files
