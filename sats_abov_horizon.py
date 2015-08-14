@@ -7,6 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import zipfile
 import urllib
+import os
 
 degree_sign = u'\N{DEGREE SIGN}'
 
@@ -14,11 +15,12 @@ degree_sign = u'\N{DEGREE SIGN}'
 def download_tle():
     """ downloads the "ALL_TLE" file from the tle info server """
 
-    myfile = urllib.URLopener()
-    myfile.retrieve('http://www.tle.info/data/ALL_TLE.ZIP', 'ALL_TLE.ZIP')
-    azip = zipfile.ZipFile('ALL_TLE.ZIP')
-    azip.extractall('.')
-    print("TLE data obtained!")
+    if not os.path.isfile("ALL_TLE.TXT"):
+        myfile = urllib.URLopener()
+        myfile.retrieve('http://www.tle.info/data/ALL_TLE.ZIP', 'ALL_TLE.ZIP')
+        azip = zipfile.ZipFile('ALL_TLE.ZIP')
+        azip.extractall('.')
+        print("TLE data obtained!")
 
     # load TLE data into python array
     with open('ALL_TLE.TXT') as f:
@@ -85,9 +87,9 @@ def plot_observer_view(lat, lon, elevation):
             # print out satellite info
             for i in range(len(sat_objs)):
                 if theta_r != math.degrees(sat_objs[i].az) or math.cos(sat_objs[i].alt) != r:
-                    print("{name}: az = {az} \t alt = {alt}".format(name = sat_names[i],
-                                                                    az = math.degrees(sat_objs[i].az),
-                                                                    alt = math.degrees(sat_objs[i].alt)))
+                    print("{name}: \t az = {az} \t alt = {alt}".format(name = sat_names[i],
+                                                                       az = math.degrees(sat_objs[i].az),
+                                                                       alt = math.degrees(sat_objs[i].alt)))
 
         # generate coordinate list
         for sat in sat_objs:
