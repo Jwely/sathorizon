@@ -13,88 +13,44 @@ import urllib2
 
 degree_sign = u'\N{DEGREE SIGN}'
 
-# http://www.celestrak.com/NORAD/elements/
- 
-# import tle data from NORAD if internet_on(), save as sat=ephem.readtle(...)-----
 
+def download_tle():
+    """ downloads the "ALL_TLE" file from the tle info server """
 
-def internet_on():
-    try:
-        urllib2.urlopen('http://google.com', timeout=1)   # tries to contact Google
-        return True
-    except: pass
-    return False
-
-
-if internet_on():
     myfile = urllib.URLopener()
     myfile.retrieve('http://www.tle.info/data/ALL_TLE.ZIP', 'ALL_TLE.ZIP')
-    print 'ALL_TLE.ZIP updated.'
-else:
-    print 'Connection unavailable. Using saved ALL_TLE.ZIP (' + time.ctime(os.path.getmtime('ALL_TLE.ZIP')) + ')'
-content = []
- 
-print 'Unzipping ALL_TLE.ZIP...'
-azip = zipfile.ZipFile('ALL_TLE.ZIP')
-azip.extractall('.')
-print "Done unzipping"
+    azip = zipfile.ZipFile('ALL_TLE.ZIP')
+    azip.extractall('.')
+    print("TLE data obtained!")
 
-# load TLE data into python array
-with open('ALL_TLE.TXT') as f:
-    content = f.readlines()
-    print int(len(content) /  3), 'TLEs loaded from ALL_TLE.TXT.'
-    for i in range(0, len(content)):
-        content[i] = content[i].replace('\n', '')   # remove endlines
-         
-         
-# Set observer location
-home = ephem.Observer()
-locationKeyword = raw_input('Location keyword: ')   # type first few letters of the location keywords included in the entries below
-locationName = ''
+    # load TLE data into python array
+    with open('ALL_TLE.TXT') as f:
+        content = f.readlines()
+        content = [line.replace('\n', '') for line in content]  # remove end lines
+        print("loaded {0} TLEs".format(int(len(content) /  3)))
 
-if locationKeyword.lower() == 'abilene'[0:len(locationKeyword)].lower():
-    locationName = 'Abilene, TX'
-    print 'Observer in Abilene, TX.'
+    return content
+
+
+def set_observer(lat, lon, elev):
+    """
+    :param lat: latitude of observer in degrees East
+    :param lon: longitude of observer in degrees North
+    :param elev: elevation of observer in meters
+    :return:
+    """
     home = ephem.Observer()
-    home.lon = '-99.74'         # +E
-    home.lat = '32.45'          # +N
-    home.elevation = 524.0      # meters
-    # home.temp = 38.0          # deg Celcius
-    # home.pressure = 1016.0    # mbar
+    home.lat = lat
+    home.lon = lon
+    home.elevation = elev
 
-elif locationKeyword.lower() == 'college station'[0:len(locationKeyword)].lower():
-    locationName = 'College Station, TX'
-    print 'Observer in College Station, TX.'
-    home = ephem.Observer()
-    home.lon = '-96.314444'     # +E
-    home.lat = '30.601389'      # +N
-    home.elevation = 103.0      # meters
-    # home.temp = 26.0          # deg Celcius
-    # home.pressure = 0.0       # mbar
+    return home
 
-elif locationKeyword.lower() == 'oxford'[0:len(locationKeyword)].lower():
-    locationName = 'Oxford, England'
-    print 'Observer in Oxford, England.'
-    home = ephem.Observer()
-    home.lon = '-1.2578'        # +E
-    home.lat = '51.7519'        # +N
-    home.elevation = 72.0       # meters
-    # home.temp = 26.0          # deg Celcius
-    # home.pressure = 0.0       # mbar
 
-elif locationKeyword.lower() == 'bristol'[0:len(locationKeyword)].lower():
-    locationName = 'Bristol, RI'
-    print 'Observer in Bristol, RI.'
-    home = ephem.Observer()
-    home.lon = '-71.2686'       # +E
-    home.lat = '41.6842'        # +N
-    home.elevation = 40.0       # meters
-    # home.temp = 26.0          # deg Celcius
-    # home.pressure = 0.0       # mbar
- 
-else:
-    print 'Location keyword not found.'
-    sys.exit()
+content = download_tle()
+home = set_observer(37.0349, -76.3601, 3)
+print content
+
 
 
 # read in each # tle entry and save to list
